@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Send, MessageSquare, Bug, AlertCircle, MessageCircle, Clock, CheckCircle, Image, Upload, X } from 'lucide-react';
 import { Thread, ThreadReply } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
@@ -35,6 +35,7 @@ const categoryLabels = {
 
 export const ThreadDetailPage: React.FC<ThreadDetailPageProps> = ({ projectId, threadId }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { threads, toggleThread } = useThreads(projectId);
   const { replies, createReplyWithImage, refetch } = useThreadReplies(threadId);
@@ -166,7 +167,9 @@ export const ThreadDetailPage: React.FC<ThreadDetailPageProps> = ({ projectId, t
   };
 
   const handleBack = () => {
-    navigate(`/project/${projectId}`);
+    // Get the return URL from location state or default to project page
+    const returnUrl = location.state?.from || `/project/${projectId}`;
+    navigate(returnUrl);
   };
 
   const handleToggleResolve = async () => {

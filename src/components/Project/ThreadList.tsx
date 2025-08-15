@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { MessageSquare, Plus, Bug, AlertCircle, FileText, MessageCircle, Clock, CheckCircle, Image, MoreVertical, Trash2 } from 'lucide-react';
 import { Thread } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
@@ -39,6 +39,7 @@ export const ThreadList: React.FC<ThreadListProps> = ({
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { threads, loading, error, deleteThread, toggleThread } = useThreads(projectId);
   const [showNewThreadModal, setShowNewThreadModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState<string | null>(null);
@@ -80,7 +81,9 @@ export const ThreadList: React.FC<ThreadListProps> = ({
   };
 
   const handleThreadClick = (thread: Thread) => {
-    navigate(`/project/${projectId}/thread/${thread.id}`);
+    navigate(`/project/${projectId}/thread/${thread.id}`, {
+      state: { from: location.pathname + location.search }
+    });
   };
   const handleDeleteThread = async (thread: Thread) => {
     if (!confirm(`Are you sure you want to delete "${thread.title}"?`)) return;

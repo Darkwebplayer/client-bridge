@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LogOut, User, Settings, Bell, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 interface HeaderProps {
   title?: string;
@@ -37,7 +38,9 @@ export const Header: React.FC<HeaderProps> = ({ title }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <img src="/logo.svg" alt="ClientBridge Logo" className="w-16 h-16" />
+              <Link to="/">
+                <img src="/logo.svg" alt="ClientBridge Logo" className="w-16 h-16 cursor-pointer" />
+              </Link>
               <div>
                 {user && (
                   <p className="text-xs text-gray-500">

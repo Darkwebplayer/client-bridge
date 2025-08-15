@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, MessageSquare, FileText, Bug, CheckSquare, Clock, CheckCircle2, User, Calendar, BarChart, UserPlus } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Project } from '../../types';
 import { ProjectTasks } from './ProjectTasks';
 import { ThreadList } from './ThreadList';
@@ -16,13 +17,23 @@ interface ProjectDetailProps {
 export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, onBack }) => {
   const { user } = useAuth();
   const { todos } = useTodos(project.id);
-  const [activeTab, setActiveTab] = useState<'tasks' | 'threads' | 'bugs' | 'documents'>('tasks');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  
+  // Get the active tab from URL or default to 'tasks'
+  const activeTab = (searchParams.get('tab') as 'tasks' | 'threads' | 'bugs' | 'documents') || 'tasks';
+  
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [taskProgress, setTaskProgress] = useState<number | null>(null);
 
   // Handle progress updates from ProjectTasks
   const handleProgressUpdate = (progress: number) => {
     setTaskProgress(progress);
+  };
+
+  // Update URL when tab changes
+  const setActiveTab = (tab: 'tasks' | 'threads' | 'bugs' | 'documents') => {
+    setSearchParams({ tab });
   };
 
   // Use real-time progress from tasks or fallback to project progress
