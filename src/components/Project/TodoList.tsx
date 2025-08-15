@@ -29,7 +29,7 @@ export const TodoList: React.FC<TodoListProps> = ({ projectId, onUpdate }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCategoryFilter, setShowCategoryFilter] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showAddCategoryForm, setShowAddCategoryForm] = useState(false);
   const [newCategory, setNewCategory] = useState({ name: '', color: '#6B7280' });
   const [newTodo, setNewTodo] = useState({
@@ -114,17 +114,13 @@ export const TodoList: React.FC<TodoListProps> = ({ projectId, onUpdate }) => {
     }
   };
 
-  const toggleCategoryFilter = (categoryId: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(categoryId) 
-        ? prev.filter(id => id !== categoryId) 
-        : [...prev, categoryId]
-    );
+  const selectCategory = (categoryId: string) => {
+    setSelectedCategory(selectedCategory === categoryId ? null : categoryId);
   };
 
   const filteredTodos = todos.filter(todo => {
-    if (selectedCategories.length === 0) return true;
-    return selectedCategories.includes(todo.category);
+    if (!selectedCategory) return true;
+    return todo.category === selectedCategory;
   });
 
   const completedTodos = filteredTodos.filter(t => t.completed);
@@ -207,28 +203,38 @@ export const TodoList: React.FC<TodoListProps> = ({ projectId, onUpdate }) => {
               {categories.map((category) => (
                 <button
                   key={category.id}
-                  onClick={() => toggleCategoryFilter(category.id)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
-                    selectedCategories.includes(category.id)
-                      ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                      : 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200'
+                  onClick={() => selectCategory(category.id)}
+                  className={`px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
+                    selectedCategory === category.id
+                      ? 'ring-2 ring-offset-2 ring-blue-500'
+                      : 'hover:bg-gray-100'
                   }`}
                   style={{
-                    borderLeftWidth: '4px',
-                    borderLeftColor: category.color,
+                    backgroundColor: selectedCategory === category.id ? `${category.color}20` : '#f9fafb',
+                    color: category.color,
+                    border: `1px solid ${category.color}40`,
                   }}
                 >
-                  {category.name}
+                  <div 
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: category.color }}
+                  ></div>
+                  <span>{category.name}</span>
+                  {selectedCategory === category.id && (
+                    <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-white"></div>
+                    </div>
+                  )}
                 </button>
               ))}
               
               {user?.role === 'freelancer' && (
                 <button
                   onClick={() => setShowAddCategoryForm(!showAddCategoryForm)}
-                  className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 flex items-center"
+                  className="px-3 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 flex items-center space-x-1"
                 >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add Category
+                  <Plus className="w-4 h-4" />
+                  <span>Add Category</span>
                 </button>
               )}
             </div>
@@ -618,14 +624,14 @@ export const TodoList: React.FC<TodoListProps> = ({ projectId, onUpdate }) => {
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
             <p className="text-gray-600 mb-6">
-              {selectedCategories.length > 0
-                ? 'No tasks match your selected filters'
+              {selectedCategory
+                ? `No tasks match your selected category`
                 : user?.role === 'freelancer'
                 ? 'Create your first task to start tracking progress'
                 : 'Tasks will appear here when created by your freelancer'
               }
             </p>
-            {user?.role === 'freelancer' && selectedCategories.length === 0 && (
+            {user?.role === 'freelancer' && !selectedCategory && (
               <button 
                 onClick={() => setShowAddForm(true)}
                 className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
