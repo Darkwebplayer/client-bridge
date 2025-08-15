@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { Todo } from '../types';
 import { useAuth } from '../contexts/AuthContext';
-import { useProjects } from './useProjects';
 
 export const useTodos = (projectId: string) => {
   const { user } = useAuth();
@@ -37,10 +36,11 @@ export const useTodos = (projectId: string) => {
         title: todo.title,
         description: todo.description,
         completed: todo.completed,
-        category: todo.category,
+        category: todo.category, // This is now the category ID
         priority: todo.priority,
         createdAt: new Date(todo.created_at),
         completedAt: todo.completed_at ? new Date(todo.completed_at) : undefined,
+        deliveryDate: todo.delivery_date ? new Date(todo.delivery_date) : undefined,
       }));
 
       console.log('Loaded todos:', formattedTodos.length);
@@ -57,8 +57,9 @@ export const useTodos = (projectId: string) => {
   const createTodo = useCallback(async (todoData: {
     title: string;
     description?: string;
-    category: string;
+    category: string; // This is now the category ID
     priority: 'low' | 'medium' | 'high';
+    delivery_date?: string | null;
   }) => {
     if (!user || user.role !== 'freelancer') {
       throw new Error('Only freelancers can create todos');
@@ -73,8 +74,9 @@ export const useTodos = (projectId: string) => {
           project_id: projectId,
           title: todoData.title,
           description: todoData.description,
-          category: todoData.category,
+          category: todoData.category, // This is now the category ID
           priority: todoData.priority,
+          delivery_date: todoData.delivery_date || null,
         })
         .select()
         .single();
@@ -176,6 +178,7 @@ export const useTodos = (projectId: string) => {
       updateProjectProgress();
     }
   }, [todos, updateProjectProgress, refreshTrigger]);
+
   // Load todos when projectId changes
   useEffect(() => {
     loadTodos();

@@ -26,10 +26,11 @@ export interface Todo {
   title: string;
   description?: string;
   completed: boolean;
-  category: string;
+  category: string; // This is now the category ID
   priority: 'low' | 'medium' | 'high';
   createdAt: Date;
   completedAt?: Date;
+  deliveryDate?: Date;
 }
 
 export interface Thread {
