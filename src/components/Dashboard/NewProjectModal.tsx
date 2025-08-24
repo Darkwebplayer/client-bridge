@@ -36,11 +36,8 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({ isOpen, onClos
       });
 
       if (result.success) {
-        onSubmit({
-          ...result.project,
-          clientEmails: validEmails
-        });
-        
+        // Just close the modal and let the project list refresh via useEffect
+        // Don't call onSubmit with project data since we already created the project
         setFormData({ name: '', description: '', timeline: '' });
         setClientEmails(['']);
         setIsSubmitting(false);
