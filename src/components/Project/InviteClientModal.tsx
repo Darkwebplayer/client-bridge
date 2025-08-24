@@ -40,9 +40,9 @@ export const InviteClientModal: React.FC<InviteClientModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Invite Client</h2>
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Invite Client</h2>
           <button
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
@@ -51,13 +51,13 @@ export const InviteClientModal: React.FC<InviteClientModalProps> = ({
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center">
-              <User className="w-5 h-5 text-blue-600 mr-2" />
+            <div className="flex items-start">
+              <User className="w-5 h-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium text-blue-800">Project: {projectName}</p>
-                <p className="text-xs text-blue-600">Share this link with your client to give them access</p>
+                <p className="text-xs text-blue-600 mt-1">Share this link with your client to give them access</p>
               </div>
             </div>
           </div>
@@ -72,7 +72,7 @@ export const InviteClientModal: React.FC<InviteClientModalProps> = ({
                 type="text"
                 value={inviteUrl}
                 readOnly
-                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono"
+                className="w-full pl-10 pr-12 py-2 sm:py-3 border border-gray-300 rounded-lg bg-gray-50 text-xs sm:text-sm font-mono"
               />
               <button
                 onClick={handleCopyLink}
@@ -100,17 +100,17 @@ export const InviteClientModal: React.FC<InviteClientModalProps> = ({
             </ul>
           </div>
 
-          <div className="flex space-x-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
+              className="w-full px-4 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
             >
               Close
             </button>
             <button
               onClick={handleCopyLink}
-              className="flex-1 flex items-center justify-center px-4 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+              className="w-full flex items-center justify-center px-4 py-2 sm:py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
             >
               {copied ? (
                 <>

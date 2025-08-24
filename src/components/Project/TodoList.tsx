@@ -158,7 +158,7 @@ export const TodoList: React.FC<TodoListProps> = ({ projectId, onUpdate }) => {
   return (
     <div className="space-y-6">
       {/* Header with Stats */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-xl font-semibold text-gray-900">Tasks</h3>
           <div className="flex items-center space-x-4 mt-2">
@@ -175,7 +175,7 @@ export const TodoList: React.FC<TodoListProps> = ({ projectId, onUpdate }) => {
         {user?.role === 'freelancer' && (
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-sm"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-sm"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Task
@@ -241,7 +241,7 @@ export const TodoList: React.FC<TodoListProps> = ({ projectId, onUpdate }) => {
             
             {showAddCategoryForm && (
               <form onSubmit={handleAddCategory} className="mt-4 pt-4 border-t border-gray-200">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="categoryName" className="block text-sm font-medium text-gray-700 mb-2">
                       Category Name
@@ -315,7 +315,7 @@ export const TodoList: React.FC<TodoListProps> = ({ projectId, onUpdate }) => {
                 id="title"
                 value={newTodo.title}
                 onChange={(e) => setNewTodo({ ...newTodo, title: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 placeholder="Enter task title..."
                 required
               />
@@ -330,12 +330,12 @@ export const TodoList: React.FC<TodoListProps> = ({ projectId, onUpdate }) => {
                 value={newTodo.description}
                 onChange={(e) => setNewTodo({ ...newTodo, description: e.target.value })}
                 rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
                 placeholder="Describe the task (optional)..."
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label htmlFor="category" className="block text-sm font-medium text-gray-700">
@@ -356,7 +356,7 @@ export const TodoList: React.FC<TodoListProps> = ({ projectId, onUpdate }) => {
                   id="category"
                   value={newTodo.category}
                   onChange={(e) => setNewTodo({ ...newTodo, category: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   required
                 >
                   <option value="">Select a category</option>
@@ -415,7 +415,7 @@ export const TodoList: React.FC<TodoListProps> = ({ projectId, onUpdate }) => {
                   id="priority"
                   value={newTodo.priority}
                   onChange={(e) => setNewTodo({ ...newTodo, priority: e.target.value as any })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -432,12 +432,12 @@ export const TodoList: React.FC<TodoListProps> = ({ projectId, onUpdate }) => {
                   id="delivery_date"
                   value={newTodo.delivery_date}
                   onChange={(e) => setNewTodo({ ...newTodo, delivery_date: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4">
+            <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-4">
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
@@ -448,7 +448,7 @@ export const TodoList: React.FC<TodoListProps> = ({ projectId, onUpdate }) => {
               <button
                 type="submit"
                 disabled={isSubmitting || !newTodo.title.trim() || !newTodo.category}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
               >
                 {isSubmitting ? (
                   <>

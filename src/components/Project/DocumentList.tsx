@@ -123,7 +123,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({ projectId }) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Documents</h3>
           <p className="text-sm text-gray-600 mt-1">
@@ -134,7 +134,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({ projectId }) => {
         {user?.role === 'freelancer' && (
           <button 
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Document

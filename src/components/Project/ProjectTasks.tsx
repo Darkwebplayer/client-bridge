@@ -23,10 +23,10 @@ export const ProjectTasks: React.FC<ProjectTasksProps> = ({ projectId, onProgres
   }, [progress, onProgressUpdate]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-2">Project Tasks</h3>
-        <p className="text-sm text-gray-600 mb-6">
+        <p className="text-sm text-gray-600 mb-4 sm:mb-6">
           Track progress with organized tasks and milestones • {completedTasks}/{totalTasks} completed ({progress}%)
         </p>
       </div>

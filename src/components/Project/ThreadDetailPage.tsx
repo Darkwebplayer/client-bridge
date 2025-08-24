@@ -218,72 +218,78 @@ export const ThreadDetailPage: React.FC<ThreadDetailPageProps> = ({ projectId, t
   return (
     <div className="max-w-4xl mx-auto px-6 py-8">
       {/* Header */}
-      <div className="flex items-center mb-8">
-        <button
-          onClick={handleBack}
-          className="mr-4 p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200 rounded-lg hover:bg-gray-100"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="flex-1">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${categoryColors[thread.category]}`}>
-              <IconComponent className="w-4 h-4 mr-2" />
-              {categoryLabels[thread.category]}
+      <div className="flex flex-col sm:flex-row sm:items-start mb-6 sm:mb-8">
+        <div className="flex items-center mb-4 sm:mb-0">
+          <button
+            onClick={handleBack}
+            className="mr-4 p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200 rounded-lg hover:bg-gray-100"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs sm:text-sm font-medium ${categoryColors[thread.category]}`}>
+                <IconComponent className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                {categoryLabels[thread.category]}
+              </div>
+              {thread.isResolved && (
+                <div className="inline-flex items-center px-2 py-1 rounded-full text-xs sm:text-sm font-medium bg-green-100 text-green-800">
+                  <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  Resolved
+                </div>
+              )}
             </div>
-            {thread.isResolved && (
-              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Resolved
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{thread.title}</h1>
+            {thread.url && (
+              <div className="mb-3">
+                <a
+                  href={thread.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 underline break-all"
+                >
+                  🔗 {thread.url}
+                </a>
               </div>
             )}
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{thread.title}</h1>
-          {thread.url && (
-            <div className="mb-3">
-              <a
-                href={thread.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:text-blue-800 underline break-all"
-              >
-                🔗 {thread.url}
-              </a>
+            <div className="flex flex-wrap items-center text-xs sm:text-sm text-gray-600 gap-2">
+              <span>Started by {thread.creatorName}</span>
+              <span>•</span>
+              <div className="flex items-center">
+                <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                {formatDate(thread.createdAt)}
+              </div>
+              <span>•</span>
+              <span>{replies.length + 1} {replies.length === 0 ? 'message' : 'messages'}</span>
             </div>
-          )}
-          <div className="flex items-center text-sm text-gray-600">
-            <span>Started by {thread.creatorName}</span>
-            <span className="mx-2">•</span>
-            <div className="flex items-center">
-              <Clock className="w-4 h-4 mr-1" />
-              {formatDate(thread.createdAt)}
-            </div>
-            <span className="mx-2">•</span>
-            <span>{replies.length + 1} {replies.length === 0 ? 'message' : 'messages'}</span>
           </div>
         </div>
-        {user?.role === 'freelancer' && (
-          <button
-            onClick={handleToggleResolve}
-            className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-              thread.isResolved
-                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                : 'bg-green-600 text-white hover:bg-green-700'
-            }`}
-          >
-            {thread.isResolved ? (
-              <>
-                <AlertCircle className="w-4 h-4 mr-2" />
-                Mark as Unresolved
-              </>
-            ) : (
-              <>
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Mark as Resolved
-              </>
-            )}
-          </button>
-        )}
+        <div className="sm:ml-auto sm:pl-4 mt-2 sm:mt-0">
+          {user?.role === 'freelancer' && (
+            <button
+              onClick={handleToggleResolve}
+              className={`w-full sm:w-auto inline-flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 ${
+                thread.isResolved
+                  ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-green-600 text-white hover:bg-green-700'
+              }`}
+            >
+              {thread.isResolved ? (
+                <>
+                  <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden xs:inline">Mark as Unresolved</span>
+                  <span className="xs:hidden">Unresolve</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden xs:inline">Mark as Resolved</span>
+                  <span className="xs:hidden">Resolve</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Thread Content */}
@@ -394,9 +400,9 @@ export const ThreadDetailPage: React.FC<ThreadDetailPageProps> = ({ projectId, t
       </div>
 
       {/* Reply Form */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
         <form onSubmit={handleSubmitReply}>
-          <div className="flex items-start space-x-4">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
             <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
               <span className="text-white font-medium text-sm">
                 {user ? getInitials(user.name) : 'U'}
@@ -412,7 +418,7 @@ export const ThreadDetailPage: React.FC<ThreadDetailPageProps> = ({ projectId, t
                   value={newReply}
                   onChange={(e) => setNewReply(e.target.value)}
                   placeholder="Share your thoughts, ask questions, or provide updates..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent resize-none transition-all duration-200"
+                  className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent resize-none transition-all duration-200"
                   rows={4}
                 />
               </div>
@@ -432,7 +438,7 @@ export const ThreadDetailPage: React.FC<ThreadDetailPageProps> = ({ projectId, t
                       htmlFor="reply-image-upload"
                       className="cursor-pointer flex flex-col items-center"
                     >
-                      <Upload className="w-6 h-6 text-gray-400 mb-1" />
+                      <Upload className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mb-1" />
                       <span className="text-xs text-gray-600">Click to attach an image</span>
                       <span className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</span>
                     </label>
@@ -448,7 +454,7 @@ export const ThreadDetailPage: React.FC<ThreadDetailPageProps> = ({ projectId, t
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
+                        <p className="text-sm font-medium text-gray-900 truncate">{selectedFile.name}</p>
                         <p className="text-xs text-gray-500">
                           {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                         </p>
@@ -479,14 +485,14 @@ export const ThreadDetailPage: React.FC<ThreadDetailPageProps> = ({ projectId, t
                 )}
               </div>
               
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="text-xs text-gray-500">
                   {newReply.length}/1000 characters
                 </div>
                 <button
                   type="submit"
                   disabled={!newReply.trim() || isSubmitting || isUploading}
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
                   {isSubmitting || isUploading ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />

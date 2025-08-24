@@ -84,102 +84,106 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, onBack })
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
       {/* Header */}
-      <div className="flex items-center mb-8">
-        <button
-          onClick={onBack}
-          className="mr-4 p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200 rounded-lg hover:bg-gray-100"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="flex-1">
-          <div className="flex items-center space-x-3 mb-2">
-            <h1 className="text-3xl font-bold text-gray-900">{project.name}</h1>
-            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(project.status)}`}>
-              {getStatusIcon(project.status)}
-              <span className="ml-1 capitalize">{project.status.replace('-', ' ')}</span>
-            </div>
-          </div>
-          <p className="text-gray-600">{project.description}</p>
-        </div>
-        {user?.role === 'freelancer' && (
+      <div className="flex flex-col sm:flex-row sm:items-center mb-6 sm:mb-8">
+        <div className="flex items-center mb-4 sm:mb-0">
           <button
-            onClick={() => setShowInviteModal(true)}
-            className="ml-4 inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
+            onClick={onBack}
+            className="mr-4 p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200 rounded-lg hover:bg-gray-100"
           >
-            <UserPlus className="w-4 h-4 mr-2" />
-            Invite Client
+            <ArrowLeft className="w-5 h-5" />
           </button>
-        )}
+          <div>
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{project.name}</h1>
+              <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(project.status)}`}>
+                {getStatusIcon(project.status)}
+                <span className="ml-1 capitalize">{project.status.replace('-', ' ')}</span>
+              </div>
+            </div>
+            <p className="text-gray-600 text-sm sm:text-base">{project.description}</p>
+          </div>
+        </div>
+        <div className="sm:ml-auto sm:pl-4 mt-2 sm:mt-0">
+          {user?.role === 'freelancer' && (
+            <button
+              onClick={() => setShowInviteModal(true)}
+              className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              Invite Client
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Project Info Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 sm:mb-8">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                 <User className="w-5 h-5 text-blue-600" />
               </div>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Client</p>
-              <p className="text-lg font-bold text-gray-900">{project.clientName}</p>
+            <div className="ml-3 sm:ml-4">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Client</p>
+              <p className="text-base sm:text-lg font-bold text-gray-900">{project.clientName}</p>
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                 <Calendar className="w-5 h-5 text-green-600" />
               </div>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Timeline</p>
-              <p className="text-lg font-bold text-gray-900">{project.timeline}</p>
+            <div className="ml-3 sm:ml-4">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Timeline</p>
+              <p className="text-base sm:text-lg font-bold text-gray-900">{project.timeline}</p>
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                 <BarChart className="w-5 h-5 text-purple-600" />
               </div>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Started</p>
-              <p className="text-lg font-bold text-gray-900">{formatDate(project.createdAt)}</p>
+            <div className="ml-3 sm:ml-4">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Started</p>
+              <p className="text-base sm:text-lg font-bold text-gray-900">{formatDate(project.createdAt)}</p>
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
                 <Clock className="w-5 h-5 text-yellow-600" />
               </div>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Last Activity</p>
-              <p className="text-lg font-bold text-gray-900">{formatDate(project.lastActivity)}</p>
+            <div className="ml-3 sm:ml-4">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Last Activity</p>
+              <p className="text-base sm:text-lg font-bold text-gray-900">{formatDate(project.lastActivity)}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Progress Section */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
-        <div className="flex justify-between items-center mb-4">
+      <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
           <h3 className="text-lg font-semibold text-gray-900">Overall Progress</h3>
-          <span className="text-3xl font-bold text-gray-900">{displayProgress}%</span>
+          <span className="text-2xl sm:text-3xl font-bold text-gray-900">{displayProgress}%</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-4 mb-3">
+        <div className="w-full bg-gray-200 rounded-full h-3 sm:h-4 mb-3">
           <div
-            className={`h-4 rounded-full transition-all duration-300 ${getProgressColor(displayProgress)}`}
+            className={`h-3 sm:h-4 rounded-full transition-all duration-300 ${getProgressColor(displayProgress)}`}
             style={{ width: `${displayProgress}%` }}
           />
         </div>
@@ -196,10 +200,10 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, onBack })
       <div className="bg-white rounded-xl border border-gray-200">
         {/* Tab Navigation */}
         <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6 overflow-x-auto" aria-label="Tabs">
+          <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 overflow-x-auto py-2" aria-label="Tabs">
             <button
               onClick={() => setActiveTab('tasks')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${
+              className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'tasks'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -213,7 +217,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, onBack })
             
             <button
               onClick={() => setActiveTab('threads')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${
+              className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'threads'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -227,7 +231,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, onBack })
             
             <button
               onClick={() => setActiveTab('bugs')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${
+              className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'bugs'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -241,7 +245,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, onBack })
             
             <button
               onClick={() => setActiveTab('documents')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${
+              className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'documents'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -256,7 +260,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, onBack })
         </div>
 
         {/* Tab Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {activeTab === 'tasks' && <ProjectTasks projectId={project.id} onProgressUpdate={handleProgressUpdate} />}
           {activeTab === 'documents' && <DocumentList projectId={project.id} />}
           {(activeTab === 'threads' || activeTab === 'bugs') && (
