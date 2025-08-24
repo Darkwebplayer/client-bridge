@@ -16,8 +16,11 @@ export const useProjects = () => {
       setLoading(true);
       setError(null);
 
+      console.log('Loading projects for user:', user);
+
       if (user.role === 'freelancer') {
         // For freelancers, get their projects
+        console.log('Fetching projects for freelancer ID:', user.id);
         const { data, error: fetchError } = await supabase
           .from('projects')
           .select('*')
@@ -26,6 +29,8 @@ export const useProjects = () => {
 
         if (fetchError) throw fetchError;
         
+        console.log('Fetched projects data:', data);
+
         const formattedProjects: Project[] = (data || []).map(project => ({
           id: project.id,
           name: project.name,
@@ -40,16 +45,36 @@ export const useProjects = () => {
           clients: []
         }));
 
+        console.log('Formatted projects:', formattedProjects);
         setProjects(formattedProjects);
       } else {
         // For clients, get projects they're part of
-        const { data: clientProjects } = await supabase
+        console.log('Fetching project clients for client ID:', user.id);
+        const { data: clientProjects, error: clientProjectsError } = await supabase
           .from('project_clients')
           .select('project_id')
           .eq('client_id', user.id);
 
+        console.log('Client projects query result:', { clientProjects, clientProjectsError });
+
+        if (clientProjectsError) {
+          console.error('Error fetching client projects:', clientProjectsError);
+          throw clientProjectsError;
+        }
+
         if (clientProjects && clientProjects.length > 0) {
           const projectIds = clientProjects.map(cp => cp.project_id);
+          console.log('Fetching projects with IDs:', projectIds);
+          
+          // First, let's verify the project_clients entries
+          const { data: projectClientsVerification, error: verificationError } = await supabase
+            .from('project_clients')
+            .select('*')
+            .in('project_id', projectIds)
+            .eq('client_id', user.id);
+          
+          console.log('Project clients verification:', { projectClientsVerification, verificationError });
+          
           const { data, error: fetchError } = await supabase
             .from('projects')
             .select('*')
@@ -57,6 +82,9 @@ export const useProjects = () => {
             .order('updated_at', { ascending: false });
 
           if (fetchError) throw fetchError;
+
+          console.log('Fetched projects data:', data);
+          console.log('Number of projects fetched:', data ? data.length : 0);
 
           const formattedProjects: Project[] = (data || []).map(project => ({
             id: project.id,
@@ -72,8 +100,10 @@ export const useProjects = () => {
             clients: []
           }));
 
+          console.log('Formatted projects:', formattedProjects);
           setProjects(formattedProjects);
         } else {
+          console.log('No client projects found');
           setProjects([]);
         }
       }

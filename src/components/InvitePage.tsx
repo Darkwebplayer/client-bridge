@@ -33,9 +33,13 @@ const ClientSignupForm: React.FC<ClientSignupFormProps> = ({
     setSuccess('');
 
     try {
+      // Store the invite token for post-signup processing
+      localStorage.setItem('pendingInviteToken', inviteToken);
+
       // Create client account
       const signupResult = await signUp(email, password, name, 'client');
       if (!signupResult.success) {
+        localStorage.removeItem('pendingInviteToken');
         throw new Error(signupResult.error || 'Failed to create account');
       }
 
@@ -49,12 +53,21 @@ const ClientSignupForm: React.FC<ClientSignupFormProps> = ({
       // Immediately try to join the project after successful signup
       const joinResult = await joinProject(inviteToken);
       if (joinResult.success) {
+        localStorage.removeItem('pendingInviteToken');
         navigate(`/project/${joinResult.projectId}`);
       } else {
-        // This can happen if auth state propagation is slow. Guide the user.
-        throw new Error(joinResult.error || 'Account created, but failed to join project. Please sign in and use the invite link again.');
+        // This can happen if auth state propagation is slow or if the email doesn't match
+        localStorage.removeItem('pendingInviteToken');
+        let errorMessage = joinResult.error || 'Account created, but failed to join project.';
+        if (errorMessage.includes('authorized')) {
+          errorMessage += ' This usually happens when the email address you used to create your account does not match the email address that was invited to this project. Please sign in with the correct email address or contact the project owner to invite your current email address.';
+        } else {
+          errorMessage += ' Please sign in and use the invite link again.';
+        }
+        throw new Error(errorMessage);
       }
     } catch (err: any) {
+      localStorage.removeItem('pendingInviteToken');
       setError(err.message);
       setIsSubmitting(false);
     }
@@ -154,13 +167,14 @@ export const InvitePage: React.FC = () => {
   const [joining, setJoining] = useState(false);
 
   const token = searchParams.get('token');
+  const decodedToken = token ? decodeURIComponent(token) : null;
 
   useEffect(() => {
     loadProjectInfo();
-  }, [token]);
+  }, [decodedToken]);
 
   const loadProjectInfo = async () => {
-    if (!token) {
+    if (!decodedToken) {
       setError('Invalid invitation link');
       setLoading(false);
       return;
@@ -168,14 +182,14 @@ export const InvitePage: React.FC = () => {
 
     try {
       const { data, error: fetchError } = await supabase
-        .rpc('get_project_by_invite_token', { p_invite_token: token })
+        .rpc('get_project_by_invite_token', { p_invite_token: decodedToken })
         .single();
 
       if (fetchError) throw new Error('Invalid invitation link or an issue with the database function.');
 
       // Check if client is allowed to join
       if (!data.client_allowed) {
-        throw new Error('You are not authorized to join this project.');
+        throw new Error('You are not authorized to join this project. This usually happens when the email address you used to create your account does not match the email address that was invited to this project. Please sign in with the correct email address or contact the project owner to invite your current email address.');
       }
 
       setProject(data);
@@ -188,11 +202,11 @@ export const InvitePage: React.FC = () => {
   };
 
   const handleJoinProject = async () => {
-    if (!user || !token) return;
+    if (!user || !decodedToken) return;
 
     setJoining(true);
     try {
-      const result = await joinProject(token);
+      const result = await joinProject(decodedToken);
       if (result.success) {
         navigate(`/project/${result.projectId}`);
       } else {
@@ -252,7 +266,7 @@ export const InvitePage: React.FC = () => {
                           <ClientSignupForm
               projectName={project?.name || ''}
               freelancerName={project?.freelancer_name || ''}
-              inviteToken={token || ''}
+              inviteToken={decodedToken || ''}
             />
             </div>
             <div className="text-center">

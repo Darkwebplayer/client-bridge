@@ -34,10 +34,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const initializeAuth = async () => {
       try {
+        console.log('Initializing auth...');
         // Get initial session
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (!mounted) return;
+
+        console.log('Initial session:', session);
 
         if (error) {
           console.error('Auth initialization error:', error);
@@ -47,9 +50,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         if (session?.user) {
+          console.log('User is authenticated:', session.user);
           setAuthUser(session.user);
           await loadUserProfile(session.user.id, session.user.email || '');
         } else {
+          console.log('No authenticated user');
           setAuthUser(null);
           setUser(null);
         }
@@ -57,6 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Auth initialization failed:', error);
       } finally {
         if (mounted) {
+          console.log('Auth initialization complete');
           setAuthInitialized(true);
           setIsLoading(false);
         }
@@ -70,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted || !authInitialized) return;
 
-      console.log('Auth state changed:', event);
+      console.log('Auth state changed:', event, session);
 
       if (session?.user) {
         setAuthUser(session.user);
@@ -89,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loadUserProfile = async (userId: string, email: string) => {
     try {
+      console.log('Loading user profile for user ID:', userId, 'email:', email);
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
@@ -101,15 +108,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
+      console.log('Loaded profile data:', profile);
+
       if (profile) {
-        setUser({
+        const userData = {
           id: profile.id,
           name: profile.name,
           email: email,
           role: profile.role,
           avatar: profile.avatar_url
-        });
+        };
+        console.log('Setting user data:', userData);
+        setUser(userData);
       } else {
+        console.log('No profile found for user ID:', userId);
         setUser(null);
       }
     } catch (error) {
@@ -223,12 +235,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (!authUser) return { success: false, error: 'Not authenticated' };
 
-    console.log('Joining project with token:', inviteToken);
+    // Decode the token in case it was URL-encoded
+    const decodedToken = decodeURIComponent(inviteToken);
+
+    console.log('Joining project with token:', decodedToken);
+    console.log('Current user email:', authUser.email);
 
     try {
       // Find project by invite token using the secure RPC call
       const { data: project, error: projectError } = await supabase
-        .rpc('get_project_by_invite_token', { p_invite_token: inviteToken })
+        .rpc('get_project_by_invite_token', { p_invite_token: decodedToken })
         .single();
 
       console.log('Project lookup result:', { project, error: projectError });
@@ -236,8 +252,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (projectError) throw new Error('Invalid invite link');
 
       // Check if client is allowed to join (if restriction is enabled)
+      console.log('Client allowed check result:', project.client_allowed);
       if (!project.client_allowed) {
-        throw new Error('You are not authorized to join this project.');
+        throw new Error('You are not authorized to join this project. This usually happens when the email address you used to create your account does not match the email address that was invited to this project. Please sign in with the correct email address or contact the project owner to invite your current email address.');
       }
 
       // Check if already joined
@@ -255,6 +272,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       // Join project
+      console.log('Attempting to join project with:', { 
+        project_id: project.id, 
+        client_id: authUser.id 
+      });
+      
       const { error: joinError } = await supabase
         .from('project_clients')
         .insert({
@@ -267,11 +289,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (joinError) throw joinError;
 
       // Update joined_at timestamp in allowed_clients table
-      await supabase
+      console.log('Updating allowed_clients with joined_at timestamp');
+      const { error: updateError } = await supabase
         .from('allowed_clients')
         .update({ joined_at: new Date() })
         .eq('project_id', project.id)
         .eq('email', authUser.email);
+      
+      console.log('Update allowed_clients result:', { error: updateError });
+
+      // Verify the project_clients entry was created
+      const { data: verification } = await supabase
+        .from('project_clients')
+        .select('*')
+        .eq('project_id', project.id)
+        .eq('client_id', authUser.id)
+        .single();
+      
+      console.log('Project clients verification:', verification);
 
       return { success: true, projectId: project.id };
     } catch (error: any) {

@@ -56,8 +56,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onProjectSelect }) => {
     clientEmails?: string[];
   }) => {
     try {
+      console.log('Creating project with data:', projectData);
+      
       if (user?.role === 'freelancer' && projectData.clientEmails) {
         // Use the service function that handles both project creation and client emails
+        console.log('Using createProjectWithClients for freelancer');
         const result = await createProjectWithClients({
           name: projectData.name,
           description: projectData.description,
@@ -65,6 +68,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onProjectSelect }) => {
           freelancerId: user.id,
           clientEmails: projectData.clientEmails
         });
+        
+        console.log('Project creation result:', result);
         
         if (result.success) {
           // Refresh the projects list
@@ -75,6 +80,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onProjectSelect }) => {
         }
       } else {
         // Use the hook's createProject function for simple project creation
+        console.log('Using createProject for simple project creation');
         await createProject({
           name: projectData.name,
           description: projectData.description,
