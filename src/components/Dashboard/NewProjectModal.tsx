@@ -6,7 +6,12 @@ import { createProjectWithClients } from '../../lib/projectService';
 interface NewProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (projectData: any) => void;
+  onSubmit: (projectData: {
+    name: string;
+    description: string;
+    timeline: string;
+    clientEmails: string[];
+  }) => void;
 }
 
 export const NewProjectModal: React.FC<NewProjectModalProps> = ({ isOpen, onClose, onSubmit }) => {
@@ -29,25 +34,19 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({ isOpen, onClos
     const validEmails = clientEmails.filter(email => email.trim() !== '');
     
     try {
-      const result = await createProjectWithClients({
+      // Pass client emails to the onSubmit function
+      await onSubmit({
         ...formData,
-        clientEmails: validEmails,
-        freelancerId: user?.id || ''
+        clientEmails: validEmails
       });
-
-      if (result.success) {
-        // Just close the modal and let the project list refresh via useEffect
-        // Don't call onSubmit with project data since we already created the project
-        setFormData({ name: '', description: '', timeline: '' });
-        setClientEmails(['']);
-        setIsSubmitting(false);
-        onClose();
-      } else {
-        console.error('Failed to create project:', result.error);
-        setIsSubmitting(false);
-      }
-    } catch (error) {
+      
+      setFormData({ name: '', description: '', timeline: '' });
+      setClientEmails(['']);
+      setIsSubmitting(false);
+      onClose();
+    } catch (error: any) {
       console.error('Error creating project:', error);
+      alert('Failed to create project: ' + error.message);
       setIsSubmitting(false);
     }
   };

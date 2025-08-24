@@ -4,6 +4,7 @@ import { ProjectCard } from './ProjectCard';
 import { NewProjectModal } from './NewProjectModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProjects } from '../../hooks/useProjects';
+import { createProjectWithClients } from '../../lib/projectService';
 
 interface DashboardProps {
   onProjectSelect: (projectId: string) => void;
@@ -11,7 +12,7 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ onProjectSelect }) => {
   const { user } = useAuth();
-  const { projects, loading, createProject } = useProjects();
+  const { projects, loading, createProject, refetch } = useProjects();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'completed' | 'on-hold'>('all');
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
@@ -52,10 +53,35 @@ export const Dashboard: React.FC<DashboardProps> = ({ onProjectSelect }) => {
     name: string;
     description: string;
     timeline: string;
+    clientEmails?: string[];
   }) => {
     try {
-      await createProject(projectData);
-      setShowNewProjectModal(false);
+      if (user?.role === 'freelancer' && projectData.clientEmails) {
+        // Use the service function that handles both project creation and client emails
+        const result = await createProjectWithClients({
+          name: projectData.name,
+          description: projectData.description,
+          timeline: projectData.timeline,
+          freelancerId: user.id,
+          clientEmails: projectData.clientEmails
+        });
+        
+        if (result.success) {
+          // Refresh the projects list
+          await refetch();
+          setShowNewProjectModal(false);
+        } else {
+          throw new Error(result.error?.message || 'Failed to create project');
+        }
+      } else {
+        // Use the hook's createProject function for simple project creation
+        await createProject({
+          name: projectData.name,
+          description: projectData.description,
+          timeline: projectData.timeline
+        });
+        setShowNewProjectModal(false);
+      }
     } catch (error: any) {
       console.error('Error creating project:', error);
       alert('Failed to create project: ' + error.message);
