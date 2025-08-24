@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { ThreadReply } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { sendNotification } from './useNotifications';
 
 export const useThreadReplies = (threadId: string) => {
   const { user } = useAuth();
@@ -98,6 +99,25 @@ export const useThreadReplies = (threadId: string) => {
         });
 
       if (error) throw error;
+
+      // Get the thread to send notification
+      const { data: thread } = await supabase
+        .from('threads')
+        .select('title, project_id')
+        .eq('id', threadId)
+        .single();
+
+      if (thread) {
+        // Send notification to project members
+        sendNotification(
+          user.id,
+          thread.project_id,
+          'reply',
+          'New Reply',
+          `New reply in thread: ${thread.title}`,
+          threadId
+        );
+      }
 
       // Immediately refresh the replies list
       await loadReplies();

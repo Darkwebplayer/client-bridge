@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Plus, User, Calendar, FileText } from 'lucide-react';
+import { X, Plus, User, Calendar, FileText, Mail, Trash2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { createProjectWithClients } from '../../lib/projectService';
 
 interface NewProjectModalProps {
   isOpen: boolean;
@@ -13,9 +14,9 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({ isOpen, onClos
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    timeline: '',
-    clientEmail: ''
+    timeline: ''
   });
+  const [clientEmails, setClientEmails] = useState<string[]>(['']);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,21 +25,34 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({ isOpen, onClos
 
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Filter out empty emails
+    const validEmails = clientEmails.filter(email => email.trim() !== '');
     
-    onSubmit({
-      ...formData,
-      freelancerId: user?.id,
-      status: 'active',
-      progress: 0,
-      createdAt: new Date(),
-      lastActivity: new Date()
-    });
-    
-    setFormData({ name: '', description: '', timeline: '', clientEmail: '' });
-    setIsSubmitting(false);
-    onClose();
+    try {
+      const result = await createProjectWithClients({
+        ...formData,
+        clientEmails: validEmails,
+        freelancerId: user?.id || ''
+      });
+
+      if (result.success) {
+        onSubmit({
+          ...result.project,
+          clientEmails: validEmails
+        });
+        
+        setFormData({ name: '', description: '', timeline: '' });
+        setClientEmails(['']);
+        setIsSubmitting(false);
+        onClose();
+      } else {
+        console.error('Failed to create project:', result.error);
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error('Error creating project:', error);
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -46,6 +60,23 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({ isOpen, onClos
       ...prev,
       [e.target.name]: e.target.value
     }));
+  };
+
+  const handleEmailChange = (index: number, value: string) => {
+    const newEmails = [...clientEmails];
+    newEmails[index] = value;
+    setClientEmails(newEmails);
+  };
+
+  const addEmailField = () => {
+    setClientEmails([...clientEmails, '']);
+  };
+
+  const removeEmailField = (index: number) => {
+    if (clientEmails.length <= 1) return;
+    const newEmails = [...clientEmails];
+    newEmails.splice(index, 1);
+    setClientEmails(newEmails);
   };
 
   if (!isOpen) return null;
@@ -119,24 +150,47 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({ isOpen, onClos
           </div>
 
           <div>
-            <label htmlFor="clientEmail" className="block text-sm font-medium text-gray-700 mb-2">
-              Client Email *
-            </label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="email"
-                id="clientEmail"
-                name="clientEmail"
-                required
-                value={formData.clientEmail}
-                onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-200"
-                placeholder="client@example.com"
-              />
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Client Emails *
+              </label>
+              <button
+                type="button"
+                onClick={addEmailField}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Add Another
+              </button>
             </div>
+            
+            {clientEmails.map((email, index) => (
+              <div key={index} className="flex items-center mb-2">
+                <div className="relative flex-grow">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="email"
+                    required={index === 0} // Only first email is required
+                    value={email}
+                    onChange={(e) => handleEmailChange(index, e.target.value)}
+                    className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-200"
+                    placeholder={`client${index + 1}@example.com`}
+                  />
+                </div>
+                {clientEmails.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeEmailField(index)}
+                    className="ml-2 p-3 text-gray-400 hover:text-red-500 transition-colors duration-200"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+            ))}
+            
             <p className="text-xs text-gray-500 mt-1">
-              An invitation will be sent to this email address
+              Invitations will be sent to these email addresses
             </p>
           </div>
 

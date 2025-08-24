@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Routes, Route, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import { LoginForm } from './components/Auth/LoginForm';
 import { InvitePage } from './components/InvitePage';
 import { Header } from './components/Layout/Header';
@@ -94,7 +95,9 @@ const AppContent: React.FC = () => {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <NotificationProvider>
+        <AppContent />
+      </NotificationProvider>
     </AuthProvider>
   );
 }

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { Document } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { sendNotification } from './useNotifications';
 
 export const useDocuments = (projectId: string) => {
   const { user } = useAuth();
@@ -85,6 +86,16 @@ export const useDocuments = (projectId: string) => {
       if (error) throw error;
 
       console.log('Document created successfully:', data);
+      
+      // Send notification to project members
+      sendNotification(
+        user.id,
+        projectId,
+        'document',
+        'New Document',
+        `New document added: ${documentData.title}`,
+        data.id
+      );
       
       // Trigger refresh
       setRefreshTrigger(prev => prev + 1);

@@ -173,6 +173,11 @@ export const InvitePage: React.FC = () => {
 
       if (fetchError) throw new Error('Invalid invitation link or an issue with the database function.');
 
+      // Check if client is allowed to join
+      if (!data.client_allowed) {
+        throw new Error('You are not authorized to join this project.');
+      }
+
       setProject(data);
     } catch (err: any) {
       console.error('Error loading project info:', err);

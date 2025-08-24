@@ -235,6 +235,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (projectError) throw new Error('Invalid invite link');
 
+      // Check if client is allowed to join (if restriction is enabled)
+      if (!project.client_allowed) {
+        throw new Error('You are not authorized to join this project.');
+      }
+
       // Check if already joined
       const { data: existing } = await supabase
         .from('project_clients')
@@ -260,6 +265,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Join project result:', { error: joinError });
 
       if (joinError) throw joinError;
+
+      // Update joined_at timestamp in allowed_clients table
+      await supabase
+        .from('allowed_clients')
+        .update({ joined_at: new Date() })
+        .eq('project_id', project.id)
+        .eq('email', authUser.email);
 
       return { success: true, projectId: project.id };
     } catch (error: any) {

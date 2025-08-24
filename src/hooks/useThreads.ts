@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { Thread } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { sendNotification } from './useNotifications';
 
 export const useThreads = (projectId: string) => {
   const { user } = useAuth();
@@ -151,6 +152,16 @@ export const useThreads = (projectId: string) => {
       if (error) throw error;
 
       console.log('Thread created successfully:', data);
+      
+      // Send notification to project members
+      sendNotification(
+        user.id,
+        projectId,
+        'thread',
+        'New Thread',
+        `New thread created: ${threadData.title}`,
+        data.id
+      );
       
       // Force immediate refresh of threads
       setRefreshTrigger(prev => prev + 1);

@@ -74,7 +74,7 @@ export interface Document {
 export interface Notification {
   id: string;
   userId: string;
-  type: 'thread_reply' | 'project_update' | 'document_shared' | 'payment_received';
+  type: 'thread' | 'document' | 'reply';
   title: string;
   message: string;
   isRead: boolean;
