@@ -12,7 +12,6 @@ interface ClientSignupFormProps {
 
 const ClientSignupForm: React.FC<ClientSignupFormProps> = ({
   projectName,
-  freelancerName,
   inviteToken
 }) => {
   const [name, setName] = useState('');
@@ -33,30 +32,24 @@ const ClientSignupForm: React.FC<ClientSignupFormProps> = ({
     setSuccess('');
 
     try {
-      // Store the invite token for post-signup processing
       localStorage.setItem('pendingInviteToken', inviteToken);
-
-      // Create client account
       const signupResult = await signUp(email, password, name, 'client');
       if (!signupResult.success) {
         localStorage.removeItem('pendingInviteToken');
         throw new Error(signupResult.error || 'Failed to create account');
       }
 
-      // Handle email confirmation required case
       if (signupResult.message) {
         setSuccess(signupResult.message);
         setIsSubmitting(false);
         return;
       }
 
-      // Immediately try to join the project after successful signup
       const joinResult = await joinProject(inviteToken);
       if (joinResult.success) {
         localStorage.removeItem('pendingInviteToken');
         navigate(`/project/${joinResult.projectId}`);
       } else {
-        // This can happen if auth state propagation is slow or if the email doesn't match
         localStorage.removeItem('pendingInviteToken');
         let errorMessage = joinResult.error || 'Account created, but failed to join project.';
         if (errorMessage.includes('authorized')) {
@@ -157,6 +150,97 @@ const ClientSignupForm: React.FC<ClientSignupFormProps> = ({
   );
 };
 
+const ClientLoginForm: React.FC<{ inviteToken: string }> = ({ inviteToken }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const { signIn } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      localStorage.setItem('pendingInviteToken', inviteToken);
+      const result = await signIn(email, password);
+
+      if (!result.success) {
+        const errorMessage = result.error || 'Failed to sign in';
+        if (errorMessage.toLowerCase().includes('invalid') || errorMessage.toLowerCase().includes('credentials')) {
+          setError('Invalid email or password.');
+        } else {
+          setError('Sign in failed. Please try again.');
+        }
+        localStorage.removeItem('pendingInviteToken');
+      } else {
+        window.location.reload();
+      }
+    } catch (err: any) {
+      localStorage.removeItem('pendingInviteToken');
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <div className="relative">
+          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-200 text-sm"
+            placeholder="Your email address"
+          />
+        </div>
+      </div>
+
+      <div>
+        <div className="relative">
+          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-200 text-sm"
+            placeholder="Your password"
+          />
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full flex items-center justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+      >
+        {isSubmitting ? (
+          <>
+            <Loader className="w-4 h-4 animate-spin mr-2" />
+            Signing In...
+          </>
+        ) : (
+          'Sign In & Join Project'
+        )}
+      </button>
+    </form>
+  );
+};
+
 export const InvitePage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -165,6 +249,7 @@ export const InvitePage: React.FC = () => {
   const [project, setProject] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
+  const [activeTab, setActiveTab] = useState<'signup' | 'login'>('login');
 
   const token = searchParams.get('token');
   const decodedToken = token ? decodeURIComponent(token) : null;
@@ -187,7 +272,6 @@ export const InvitePage: React.FC = () => {
 
       if (fetchError) throw new Error('Invalid invitation link or an issue with the database function.');
 
-      // Check if client is allowed to join
       if (!data.client_allowed) {
         throw new Error('You are not authorized to join this project. This usually happens when the email address you used to create your account does not match the email address that was invited to this project. Please sign in with the correct email address or contact the project owner to invite your current email address.');
       }
@@ -257,28 +341,54 @@ export const InvitePage: React.FC = () => {
           <p className="text-gray-600 mb-6">
             You've been invited to collaborate on <strong>{project?.name}</strong> by {project?.freelancer_name}.
           </p>
-          <div className="space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm font-medium text-blue-800 mb-2">New to ClientBridge?</p>
-              <p className="text-xs text-blue-600 mb-3">
-                Create your client account to join this project and collaborate with your freelancer.
-              </p>
-                          <ClientSignupForm
-              projectName={project?.name || ''}
-              freelancerName={project?.freelancer_name || ''}
-              inviteToken={decodedToken || ''}
-            />
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-gray-600 mb-2">Already have an account?</p>
+          
+          <div className="w-full">
+            <div className="flex border-b border-gray-200">
               <button
-                onClick={() => navigate('/')}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                onClick={() => setActiveTab('signup')}
+                className={`flex-1 py-3 text-sm font-medium text-center transition-colors duration-200 ${
+                  activeTab === 'signup'
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
               >
-                Sign in to join this project
+                Create Account
+              </button>
+              <button
+                onClick={() => setActiveTab('login')}
+                className={`flex-1 py-3 text-sm font-medium text-center transition-colors duration-200 ${
+                  activeTab === 'login'
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Sign In
               </button>
             </div>
+
+            <div className="pt-6">
+              {activeTab === 'signup' ? (
+                <>
+                  <p className="text-sm text-gray-600 mb-4 text-center">
+                    Create a new client account to join this project.
+                  </p>
+                  <ClientSignupForm
+                    projectName={project?.name || ''}
+                    freelancerName={project?.freelancer_name || ''}
+                    inviteToken={decodedToken || ''}
+                  />
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-600 mb-4 text-center">
+                    Sign in to your existing account to join this project.
+                  </p>
+                  <ClientLoginForm inviteToken={decodedToken || ''} />
+                </>
+              )}
+            </div>
           </div>
+
         </div>
       </div>
     );
