@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route, useParams } from 'react-router-dom';
+import { Routes, Route, useParams, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { LoginForm } from './components/Auth/LoginForm';
@@ -13,6 +13,7 @@ import { useProjects } from './hooks/useProjects';
 const ProjectDetailWrapper: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { projects } = useProjects();
+  const navigate = useNavigate();
   const project = id ? projects.find(p => p.id === id) : null;
 
   if (!project) {
@@ -21,18 +22,18 @@ const ProjectDetailWrapper: React.FC = () => {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Project Not Found</h1>
           <p className="text-gray-600">The project you're looking for doesn't exist or you don't have access to it.</p>
-          <a
-            href='/'
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                >
-                  Go to Dashboard
-                </a>
+          <button
+            onClick={() => navigate('/')}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+          >
+            Go to Dashboard
+          </button>
         </div>
       </div>
     );
   }
 
-  return <ProjectDetail project={project} onBack={() => window.history.back()} />;
+  return <ProjectDetail project={project} onBack={() => navigate('/')} />;
 };
 
 const ThreadDetailWrapper: React.FC = () => {
@@ -53,6 +54,7 @@ const ThreadDetailWrapper: React.FC = () => {
 };
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   // Show loading screen while auth is initializing
   if (isLoading) {
@@ -83,7 +85,7 @@ const AppContent: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <Routes>
-        <Route path="/" element={<Dashboard onProjectSelect={(id) => window.location.href = `/project/${id}`} />} />
+        <Route path="/" element={<Dashboard onProjectSelect={(id) => navigate(`/project/${id}`)} />} />
         <Route path="/project/:id" element={<ProjectDetailWrapper />} />
         <Route path="/project/:projectId/thread/:threadId" element={<ThreadDetailWrapper />} />
         <Route path="/invite" element={<InvitePage />} />
